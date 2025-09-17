@@ -11,14 +11,21 @@ import (
 	"github.com/wb-go/wbf/retry"
 )
 
+// Connection synonym for amqp091.Connection.
 type Connection = amqp091.Connection
+
+// Channel synonym for amqp091.Channel.
 type Channel = amqp091.Channel
+
+// Queue synonym for amqp091.Queue.
 type Queue = amqp091.Queue
 
+// QueueManager queue manager.
 type QueueManager struct {
 	channel *Channel
 }
 
+// QueueConfig опции для очереди.
 type QueueConfig struct {
 	Durable    bool          // Если true, то очередь сохраняется при перезапуске RabbitMQ
 	AutoDelete bool          // Если true, то очередь удаляется при отсутствии подписчиков
@@ -27,11 +34,13 @@ type QueueConfig struct {
 	Args       amqp091.Table // Доп аргументы
 }
 
+// Publisher отправитель.
 type Publisher struct {
 	channel  *Channel
 	exchange string
 }
 
+// PublishingOptions опции для отправителя.
 type PublishingOptions struct {
 	Mandatory  bool          // Если true, то сообщение будет возвращено при отсутствии очереди
 	Immediate  bool          // Если true, то сообщение будет возвращено при отсутствии потребителя
@@ -39,6 +48,7 @@ type PublishingOptions struct {
 	Headers    amqp091.Table // Заголовки
 }
 
+// ConsumerConfig опции для получателя.
 type ConsumerConfig struct {
 	Queue     string        // Имя очереди
 	Consumer  string        // Идентификатор потребителя
@@ -49,11 +59,13 @@ type ConsumerConfig struct {
 	Args      amqp091.Table // Доп аргументы
 }
 
+// Consumer получатель.
 type Consumer struct {
 	channel *Channel
 	config  *ConsumerConfig
 }
 
+// Exchange обменник.
 type Exchange struct {
 	name       string        // Название обменника
 	kind       string        // Тип обменника: direct, fanout, topic, headers
@@ -64,22 +76,22 @@ type Exchange struct {
 	Args       amqp091.Table // Доп аргументы
 }
 
-// Name возвращает название обменника
+// Name возвращает название обменника.
 func (e *Exchange) Name() string {
 	return e.name
 }
 
-// Kind возвращает тип обменника
+// Kind возвращает тип обменника.
 func (e *Exchange) Kind() string {
 	return e.name
 }
 
 /*
-NewExchange создате новый экземпляр Exchange
+NewExchange создате новый экземпляр Exchange.
 
 name - название обменника,
 
-kind - тип обменника: direct, fanout, topic, headers
+kind - тип обменника: direct, fanout, topic, headers.
 */
 func NewExchange(name, kind string) *Exchange {
 	return &Exchange{
@@ -160,7 +172,7 @@ func Connect(url string, retries int, pause time.Duration) (*Connection, error) 
 		time.Sleep(pause)
 	}
 
-	return nil, fmt.Errorf("failed to connect after %d attempts: %v", retries, err)
+	return nil, fmt.Errorf("failed to connect after %d attempts: %w", retries, err)
 }
 
 /*
@@ -242,7 +254,8 @@ func (p *Publisher) Publish(body []byte, routingKey, contentType string, options
 }
 
 /*
-PublishWithRetry пытается опубликовать сообщение с заданным routingKey в exchange, связанный с Publisher с ретраями в случае ошибки.
+PublishWithRetry пытается опубликовать сообщение с заданным routingKey в exchange,
+связанный с Publisher с ретраями в случае ошибки.
 
 body - тело сообщения,
 
@@ -252,7 +265,10 @@ contentType - тип контента,
 
 options - необязательные параметры публикации.
 */
-func (p *Publisher) PublishWithRetry(body []byte, routingKey, contentType string, strategy retry.Strategy, options ...PublishingOptions) error {
+func (p *Publisher) PublishWithRetry(
+	body []byte, routingKey, contentType string,
+	strategy retry.Strategy, options ...PublishingOptions,
+) error {
 	return retry.Do(func() error {
 		return p.Publish(body, routingKey, contentType, options...)
 	}, strategy)

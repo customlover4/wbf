@@ -27,14 +27,17 @@ func (c *Config) GetString(key string) string {
 	return c.v.GetString(key)
 }
 
+// GetInt получает числовое значение из конфигурации по ключу.
 func (c *Config) GetInt(key string) int {
 	return c.v.GetInt(key)
 }
 
+// Unmarshal распаковывает конфиг в структуру.
 func (c *Config) Unmarshal(rawVal any, opts ...viper.DecoderConfigOption) error {
 	return c.v.Unmarshal(rawVal, opts...)
 }
 
+// SetDefault устанавливает значение по умолчанию.
 func (c *Config) SetDefault(key string, value any) {
 	c.v.SetDefault(key, value)
 }
